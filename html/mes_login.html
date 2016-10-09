@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang='ja'>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />  <title>Microtremor Measurement</title>
+
+  <!-- import stylesheet and libraly for jQuery Mobile -->
+  <link rel="stylesheet" type="text/css" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+  <link rel="stylesheet" type="text/css" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+  <script type="text/javascript" src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+  <script type="text/javascript" src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script type="text/javascript" src="/javascripts/myScript.js"></script>
+
+    
+</head>
+<body>
+  <!-- page 2 : login -->
+  <div id="login" data-role="page" data-title="login">
+    <div data-role="header">
+      <h1>LOGIN</h1>
+    </div>
+
+    <div role="main" class="ui-content">
+      <form action="/" method="POST" id="form_login">
+        <label for="userID">ID: (your e-mail address)</label>
+        <input id="userID" name="user_id" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+        <label for="userPW">Password:</label>
+        <input id="userPW" name="user_pw" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+        <br>
+        <button type="submit" class="ui-btn" name="button-status" value="login">login</button>
+      </form>
+
+      <hr class="style-one">
+      <p> When you want to create new account, click <a href=#new_account>"here"</a></p>
+      <p> When you forget your password, click <a href=#forget_password>"here"</a></p>
+
+      {% if comment_flag %}
+        <br>
+        <hr class="style-one">
+        <p> {{ comment }}</p>
+      {% endif %}
+    </div>
+
+    <div data-role="footer">
+      Copyright 2016, OYO corporation
+    </div>
+  </div>
+
+</body>
+</html>
