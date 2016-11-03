@@ -22,3 +22,11 @@ libraries:
   version: "2.6"
 - name: markupsafe
   version: "0.15"
+- name: numpy
+  version: "1.6.1"
+- name: matplotlib
+  version: "1.2.0"
+
+env_variables:
+  GCS_BUCKET_NAME: 'oyomtstorage'
+

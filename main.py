@@ -5,42 +5,44 @@ import jinja2
 import logging
 import json
 import sys
-sys.path.append('/lib')
+import csv
 
-import smtplib
 from google.appengine.api import app_identity
-from google.appengine.api import urlfetch
-from google.appengine.ext import ndb
 import cloudstorage as gcs
+import googlecloudstorage
 
-from google.appengine.api import mail
+
+#--- define bucket & storage file name ---
+bucket_name = os.environ.get('GCS_BUCKET_NAME', app_identity.get_default_gcs_bucket_name())
+storaged_userdata = '/' + bucket_name + '/userdata2.json'
+storaged_data_dir ='/' + bucket_name
+
+#--- initialize
+try:
+    gcs.delete(storaged_userdata)
+except gcs.NotFoundError:
+    pass
+
+ 
+#--- delete google cloud storage file ----
+mygcs = googlecloudstorage.GoogleCloudStorage()
 
 #--- define and read user data ---
-class UserData(ndb.Model):
+class UserData():
     def __init__(self):
 
-#        file = open('./data/userdata.json','r')
-#        self.userData = json.load(file)
-#        logging.info(type(self.userData))
-#        logging.info(self.userData[0]["id"])
-
-#        self.userData = ndb.StringProperty()
-        self.bucket_name = os.environ.get('BUCKET_NAME', app_identity.get_default_gcs_bucket_name())
-        file = '/' + self.bucket_name + '/files/' + 'userdata.json'
-        logging.info("file = " + file)
-
-        if os.path.isfile(file):
-            logging.info("file exist")
-            gcs_file = gcs.open(file,'r')
-            self.userData = json.load(gcs_file)
-        else:
-            logging.info("file dose not exist")
-            self.userData = []
+#        try:
+#            self.userData = json.loads(mygcs.read_file(storaged_userdata))
+#            logging.info("file exist")
+#        except gcs.NotFoundError:
+#            logging.info("file not exist")
+            org_file = open('./data/userdata.json','r')
+            self.userData = json.load(org_file)
 
 
 userdata = UserData()
+logging.info(type(userdata.userData))
 logging.info(userdata.userData)
-login_status = 0
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -80,66 +82,41 @@ class MainPage(BaseHandler):
         if status == "login":
             userID = obj['user_id']
             userPW = obj['user_pw']
-#            logging.info("user id =" + userID)
-#            logging.info("user pw =" + userPW)
-
 
             logging.info("=== Login ID check ===")
-            flag = -9
-            for user in userdata.userData:
-#                logging.info(user["id"])
 
-                if user["id"] == userID:
-                    flag = 0
-                    if user["password"] == userPW:
-                        logging.info("HIT")
-                        self.response.content_type = "application/json; charset=utf-8"
-                        obj2 = { 'status': 1 , 'projects': user["projects"] }
-                        logging.info(obj2)
-                        self.response.out.write(json.dumps(obj2))
-                    else:
-                        logging.info("password error : " + userPW)
-                        obj2 = { 'status': 2 }
- #                       logging.info(obj2)
-                        self.response.out.write(json.dumps(obj2))
-                    break
+            if userdata.userData.has_key(userID):
+                if userdata.userData[userID]["password"] == userPW:
+                    logging.info("HIT")
+                    self.response.content_type = "application/json; charset=utf-8"
+                    obj2 = { 'status': 1 , 'username': userdata.userData[userID]["name"], 'projects': userdata.userData[userID]["projects"] }
+                    self.response.out.write(json.dumps(obj2))
+                else:
+                    logging.info("password error : " + userPW)
+                    obj2 = { 'status': 2 }
+                    self.response.out.write(json.dumps(obj2))
 
-            if flag == -9:
+            else:
                 logging.info("OUT")
                 obj2 = { 'status': 3 }
-#                logging.info(obj2)
                 self.response.out.write(json.dumps(obj2))
-
 
         elif status == "account":
             userID = obj['user_id']
             userPW = obj['user_pw']
             userNM = obj['user_nm']
 
-            flag = 0
-            for user in userdata.userData:
-                if user["id"] == userID:
-                    flag = -9
-                    logging.info("already exit your ID")
-                    self.response.content_type = "application/json; charset=utf-8"
-                    obj2 = { 'status': 9 }
-                    self.response.out.write(json.dumps(obj2))
-                    break
-            
-            logging.info(flag)
-            if flag == 0:
-                new_account = { "id": userID, "password": userPW, "name": userNM, "projects": [] }
-                userdata.userData.append(new_account)
+            if userdata.userData.has_key(userID):
+                logging.info("already exit your ID")
+                self.response.content_type = "application/json; charset=utf-8"
+                obj2 = { 'status': 9 }
+                self.response.out.write(json.dumps(obj2))
+            else:           
+                userdata.userData[userID] = { 'password' : userPW , 'name' : userNM, 'projects' : [] }
+                userDataString = json.dumps(userdata.userData)
+                logging.info(userDataString)
 
-#                bucket_name = os.environ.get('BUCKET_NAME', app_identity.get_default_gcs_bucket_name())
-                file = '/' + userdata.bucket_name + '/files/' + 'userdata.json'
-                logging.info(file)
-                with gcs.open(file,'w') as gcs_file:
-                    userDataString = str(map(str, userdata.userData))
-                    logging.info(userDataString)
-                    gcs_file.write(userDataString)
-
-
+                mygcs.create_file('text', storaged_userdata, userDataString)
 
         elif status == "send_password":
             userID = obj['user_id']
@@ -166,25 +143,72 @@ class MainPage(BaseHandler):
 
 
         elif status == "send_obspointlist":
-            project = obj["project"]
-            data = obj["data"]
+            project_name = obj['project']
+            sitelist = obj['sitelist']
+            obs_point_list = obj['obs_cntl_file']
 
-            bucket_name = os.environ.get('BUCKET_NAME', app_identity.get_default_gcs_bucket_name())
-            file_path = '/' + bucket_name + '/files/' + 'test.txt'
-            with gcs.open(file_path,'w') as gcs_file:
-                gcs_file.write("test")
+            splited_strings = obs_point_list.split("\r\n")
+            num_sites = len(splited_strings) - 1
+            logging.info("number of sites : " + str(len(splited_strings)))
+            json_string = ' { ' 
+            for i in range(1, num_sites):
+                sitesdata = splited_strings[i].split(",")
+                json_string = json_string + ' \"' + sitesdata[2] + '\" : {'
+                json_string = json_string + ' \"longitude" : ' + str(sitesdata[0])
+                json_string = json_string + ', \"latitude\" : ' + str(sitesdata[1])
+                json_string = json_string + ', \"observer_name\" : null'
+                json_string = json_string + ', \"start_time\" : null'
+                json_string = json_string + ', \"end_time\" : null'
+                json_string = json_string + ', \"flag\" : 0'
+                json_string = json_string + ', \"time_stamp\" : null }'
+                if i != num_sites-1:
+                    json_string += ' , '
+                else:
+                    json_string += ' } '
+            
+#            logging.info(json_string)
+            storaged_sitelist = storaged_data_dir + '/' + project_name + '/sitelist.json'
+            mygcs.create_file('text', storaged_sitelist, json_string)
 
-#            if os.path.isdir(project):
-#                pass
-#            else:
-#                logging.info(project)
-#                os.mkdir("./kathmandu")
+            obj2 = { 'status': 1 }
+            self.response.out.write(json.dumps(obj2))
 
+        elif status == "select_project":
+            user_id = obj['userid']
+            project_name = obj['project']
+#            logging.info(user_id)
+#            logging.info(project_name)
 
+            storaged_sitelist = storaged_data_dir + '/' + project_name + '/sitelist.json'
+            logging.info(storaged_sitelist)
+
+            fileavability, filedata = mygcs.read_file(storaged_sitelist)
+            logging.info("file exist : " + str(fileavability))
+#            logging.info("data :" + filedata)
+
+            if fileavability == 1:
+                obj2 = { 'status': 1 , 'sitesdata': filedata }
+                self.response.out.write(json.dumps(obj2))
+                #--- add project to userdata
+                count = 0
+                for already_project in userdata.userData[user_id]["projects"]:
+                    if already_project == project_name:
+                        count = 1
+                        break
+                if count == 0:
+                    userdata.userData[user_id]["projects"].append(project_name)
+                else:
+                    logging.info("you already joined the project : " + project_name)
+
+            else:
+                logging.info("Can not find project name : " + project_name)
+                obj2 = { 'status': 9 }
+                self.response.out.write(json.dumps(obj2))
+                
         else:
             pass
 
+
 app = webapp2.WSGIApplication([
     ('/', MainPage),
-#    ('/', MesMapPage),
 ], debug=True)

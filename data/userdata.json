@@ -1,5 +1,12 @@
-[ {  "id" : "nobusuke.hasegawa@gmail.com", 
-     "password" : "nobusuke19680630" ,
-     "name" : "nobusuke.hasegawa",
-     "projects" : ["test"]
-} ]
+{
+    "nobusuke.hasegawa@gmail.com":{ 
+        "password" : "nobusuke19680630", 
+        "name" : "nobusuke.hasegawa", 
+        "projects" : ["kathmandu"] 
+    }, 
+    "yukari.hasegawa@gmail.com":{ 
+        "password" : "yukari19691112", 
+        "name" : "yukari.hasegawa", 
+        "projects" : ["test"] 
+    }  
+}

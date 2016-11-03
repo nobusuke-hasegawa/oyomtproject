@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang='ja'>
+<html lang='en'>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />  <title>Microtremor Measurement</title>
@@ -11,13 +11,14 @@
   <script type="text/javascript" src="/javascripts/jquery-1.11.1.min.js"></script>
   <script type="text/javascript" src="/javascripts/jquery.mobile-1.4.5.min.js"></script>
   <script type="text/javascript" src="/javascripts/leaflet.js"></script>
+
+  <script type="text/javascript" src="/javascripts/marker_popupmenu.js"></script>
   <script type="text/javascript" src="/javascripts/myScript_map.js"></script>
   <script type="text/javascript" src="/javascripts/myScript.js"></script>
 
     
 </head>
 <body>
-
   <!-- page 1 : title -->
   <div id="title" data-role="page" data-title="title">
     <div data-role="header">
@@ -45,11 +46,11 @@
 
     <div role="main" class="ui-content">
       <label for="userID">ID: (your e-mail address)</label>
-      <input id="userID" name="user_id" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <input id="userID" name="user_id" type="text" data-clear-btn="true" data-clear-btn-text="clear" value="nobusuke.hasegawa@gmail.com"/>
       <label for="userPW">Password:</label>
-      <input id="userPW" name="user_pw" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <input id="userPW" name="user_pw" type="password" data-clear-btn="true" data-clear-btn-text="clear" value="nobusuke19680630"/>
       <br>
-      <button class="ui-btn" name="button_status" value="login" onclick=loginInfoSend() >login</button>
+      <button class="ui-btn" name="button_status" value="login" onclick=loginData() >login</button>
 
       <hr class="style-one">
       <p> When you want to create new account, click <a href=#new_account>"here"</a></p>
@@ -70,16 +71,16 @@
 
     <div role="main" class="ui-content">
       <label for="new_userName">User Name:</label>
-      <input id="new_userName" name="new_user_name" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <input id="new_userName" name="new_user_name" type="text" data-clear-btn="true" data-clear-btn-text="clear" autocomplete="on" />
 
       <label for="new_userPW">Password:</label>
-      <input id="new_userPW" name="new_user_pw" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <input id="new_userPW" name="new_user_pw" type="text" data-clear-btn="true" data-clear-btn-text="clear" autocomplete="on" />
 
       <label for="new_userMail">E mail:</label>
       <input id="new_userMail" name="new_user_mail" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
 
       <br>
-      <button class="ui-btn" name="button_status" value="new_account" onclick=accountInfoSend() >create account</button>
+      <button class="ui-btn" name="button_status" value="new_account" onclick=accountSend() >create account</button>
 
     </div>
 
@@ -109,7 +110,7 @@
     </div>
 
     <div role="main" class="ui-content">
-<!--      <form action="" method="post">  -->
+        <!--      <form action="" method="post">  -->
         <div class="ui-field-contain">
           <label for="select1">continue former work</label>
           <input type="radio" name="radioProject" id="select1" value="1">
@@ -131,12 +132,12 @@
           <input type="radio" name="radioProject" id="select4" value="4" >
           <a>Enter project name</a><br>
           <input id="create_project" name="create_project" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
-          <a>Enter observation point list (kml)</a><br>
+          <a>Enter observation point list (csv)</a><br>
           <input type="file" id="listObsPoints" name="list_obs_points" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
 
         </div>
-<!--      </form>  -->
-        <button class="ui-btn" name="button_status" value="select_project" onclick=projectInfoSend() >send</button>
+        <!--      </form>  -->
+        <button class="ui-btn" name="button_status" value="select_project" onclick=projectSend() >send</button>
     </div>
 
     <div data-role="footer">
@@ -159,5 +160,30 @@
     </div>
   </div> 
 
-</body>
+  <!-- page 7 : measurement -->
+  <div id="measurement" data-role="page" data-title="measurement">
+    <div data-role="header">
+    </div>
+
+    <div role="main" class="ui-content">
+      <label for="siteName">SITE NAME:</label>
+      <input id="siteName" name="site_name" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <label for="location">LOCATION:</label>
+      <input id="location" name="location" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <label for="observerName">OBSERVER NAME:</label>
+      <input id="observerName" name="observer_name" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <label for="start_time">START TIME:</label>
+      <input id="starttime" name="start_time" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <label for="end_time">END TIME:</label>
+      <input id="endtime" name="end_time" type="text" data-clear-btn="true" data-clear-btn-text="clear" />
+      <progress max="100" value="50">50/100</progress>
+      <br>
+      <button class="ui-btn" name="button_status" value="save_data" onclick=loginData() >save</button>
+    </div>
+
+    <div data-role="footer">
+    </div>
+  </div>
+
+ </body>
 </html>
