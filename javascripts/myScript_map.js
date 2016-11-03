@@ -153,7 +153,6 @@ function watchCurrPosition_start(){
         var crd = pos.coords;
 
         LatLng = new L.LatLng(crd.latitude, crd.longitude);
-        alert("curr_marker_status = " + curr_marker_status + " , " + LatLng);
 
         if (curr_marker_status == 0){
             curr_marker = L.marker(LatLng, { icon: currentPosIcon }).addTo(map);
